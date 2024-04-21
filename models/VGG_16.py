@@ -109,7 +109,7 @@ class VGG16(torch.nn.Module):
                                stride=(2, 2))
         )
 
-        height, width = 2, 2  ## you may want to change that depending on the input image size
+        height, width = 2, 2
         self.classifier = torch.nn.Sequential(
             torch.nn.Linear(512 * height * width, 4096),
             torch.nn.ReLU(True),
@@ -122,4 +122,21 @@ class VGG16(torch.nn.Module):
 
         for m in self.modules():
             if isinstance(m, torch.torch.nn.Conv2d) or isinstance(m, torch.torch.nn.Linear):
-                torch.nn.init
+                torch.nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+                if m.bias is not None:
+                    m.bias.detach().zero_()
+
+        self.avgpool = torch.nn.AdaptiveAvgPool2d((height, width))
+
+    def forward(self, x):
+        x = self.block_1(x)
+        x = self.block_2(x)
+        x = self.block_3(x)
+        x = self.block_4(x)
+        x = self.block_5(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)  # flatten
+
+        logits = self.classifier(x)
+
+        return logits

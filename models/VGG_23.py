@@ -185,6 +185,5 @@ class VGG23(torch.nn.Module):
         x = x.view(x.size(0), -1)  # flatten
 
         logits = self.classifier(x)
-        # probas = F.softmax(logits, dim=1)
 
         return logits

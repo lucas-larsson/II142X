@@ -1,3 +1,6 @@
+import os
+
+import pandas as pd
 import torch
 from torchvision import datasets
 from torchvision import transforms
@@ -143,3 +146,22 @@ def get_dataloaders_cifar10(batch_size, num_workers=0,
         return train_loader, test_loader
     else:
         return train_loader, valid_loader, test_loader
+
+
+def save_metrics(data_lists, labels, model_version, results_dir):
+    """ Saves each metric data into its own CSV file under the given directory, handling different lengths. """
+    for data_list, label in zip(data_lists, labels):
+        filename = f"{label}_{model_version}.csv"
+        file_path = os.path.join(results_dir, filename)
+        # Create DataFrame with correct labeling for each metric
+        df = pd.DataFrame(data_list, columns=[label])
+        df.to_csv(file_path, index=False)
+        print(f"Saved {label} for Model {model_version} at {file_path}")
+
+
+def save_model(model, model_version, results_dir):
+    """ Saves the state dictionary of the given model under the specified directory with the model version in the
+    filename."""
+    model_path = os.path.join(results_dir, f'model_{model_version}.pth')
+    torch.save(model.state_dict(), model_path)
+    print(f"Model {model_version} saved successfully at {model_path}")
